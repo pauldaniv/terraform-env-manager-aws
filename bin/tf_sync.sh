@@ -58,7 +58,7 @@ function apply() {
 
 function destroy() {
   init
-  terraform destroy --auto-approve
+  terraform destroy -var-file=./conf/main.tfvars --auto-approve
 }
 
 function recreate() {
