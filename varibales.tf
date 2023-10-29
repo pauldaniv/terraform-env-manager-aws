@@ -14,3 +14,8 @@ variable "region" {
 variable "account_id" {
   type = string
 }
+
+variable "keep_lock_tables" {
+  type = bool
+  default = true
+}

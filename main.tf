@@ -13,10 +13,10 @@ provider "aws" {
 }
 
 locals {
-  envs = toset([
-    "dev",
-    "prod",
-  ])
+  envs = [
+        "dev",
+#    "env-manager",
+  ]
   tags = {
     Creator      = "Terraform Env Manager"
     Service      = "Terraform Sandbox"
@@ -26,8 +26,8 @@ locals {
 
 terraform {
   backend "s3" {
-    role_arn       = "arn:aws:iam::375158168967:role/terraform-state"
-    external_id    = "tf-admin"
+    role_arn    = "arn:aws:iam::375158168967:role/terraform-state"
+    external_id = "tf-admin"
 
     key            = "main/terraform.tfstate"
     bucket         = "terraform-sandbox-env-manager-state"
@@ -45,34 +45,34 @@ terraform {
 }
 
 resource "aws_s3_bucket" "this" {
-  for_each = local.envs
+  count = length(local.envs)
 
-  bucket = "${var.project_name}-${each.value}-state"
-  tags   = merge(local.tags, { Environment = each.value })
+  bucket = "${var.project_name}-${element(local.envs, count.index)}-state"
+  tags   = merge(local.tags, { Environment = element(local.envs, count.index) })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
 resource "aws_s3_bucket_versioning" "this" {
-  for_each = aws_s3_bucket.this
+  count = length(aws_s3_bucket.this)
 
-  bucket = aws_s3_bucket.this[each.key].id
+  bucket = element(aws_s3_bucket.this[*].id, count.index)
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_dynamodb_table" "this" {
-  for_each = local.envs
+  count = var.keep_lock_tables ? length(local.envs) : 0
 
-  name           = "${var.project_name}-${each.value}-state-lock"
+  name           = "${var.project_name}-${element(local.envs, count.index)}-state-lock"
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "LockID"
 
-  tags = merge(local.tags, { Environment = each.value })
+  tags = merge(local.tags, { Environment = element(local.envs, count.index) })
 
   attribute {
     name = "LockID"

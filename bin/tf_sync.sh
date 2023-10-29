@@ -36,7 +36,7 @@ function apply() {
     terraform apply --auto-approve $TF_PLAN
     apply_exit_code=$?
 
-    rm $tfplan
+    rm $TF_PLAN
 
     if [ $apply_exit_code -gt 0 ]; then
       echo "Error at apply phase"
