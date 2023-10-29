@@ -10,11 +10,6 @@ die() {
   exit 1
 } >&2
 
-if [[ -z "$ACTION" ]]; then
-  echo "Action not specified. $AVAILABLE_ACTIONS"
-  exit 1
-fi
-
 function init() {
   terraform init --reconfigure
 
@@ -81,6 +76,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+if [[ -z "$ACTION" ]]; then
+  echo "Action not specified. $AVAILABLE_ACTIONS"
+  exit 1
+fi
 
 if [[ "$ACTION" = "enabled" && "$GITHUB_COMMIT_MESSAGE" == *"action: apply"* ]]; then
   echo "Creating infrastructure"
