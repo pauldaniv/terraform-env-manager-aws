@@ -6,7 +6,7 @@ provider "aws" {
   region = var.region
 
   assume_role {
-    role_arn     = "arn:aws:iam::${var.account_id}:role/terraform-state"
+    role_arn     = "arn:aws:iam::375158168967:role/terraform-state"
     external_id  = "tf-admin"
     session_name = "env-management"
   }

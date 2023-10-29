@@ -19,6 +19,7 @@ function init() {
 }
 
 function apply() {
+  init
   TF_PLAN=terraform.plan
 
   terraform plan -var-file=./conf/main.tfvars -detailed-exitcode -out=$TF_PLAN
@@ -29,7 +30,30 @@ function apply() {
     exit 0
   fi
 
-  terraform apply $TF_PLAN
+  case $plan_exit_code in
+  2)
+    echo "Applying changes in plan!"
+    terraform apply --auto-approve $TF_PLAN
+    apply_exit_code=$?
+
+    rm $tfplan
+
+    if [ $apply_exit_code -gt 0 ]; then
+      echo "Error at apply phase"
+    fi
+
+    exit $apply_exit_code
+    ;;
+  1)
+    echo "Plan completed with an error"
+    exit 2
+    ;;
+  0)
+    echo "No changes"
+    exit 0
+    ;;
+  esac
+
 }
 
 function destroy() {
@@ -54,6 +78,11 @@ POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
+  -a | --action)
+    ACTION=$2
+    shift
+    shift
+    ;;
   -s | --smart-messages)
     SMART_COMMIT_MESSAGES=$2
     shift
@@ -77,7 +106,9 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
-if [[ -z "$SMART_COMMIT_MESSAGES" ]]; then
+if [[ "$ACTION" ]]; then
+  $ACTION
+elif [[ -z "$SMART_COMMIT_MESSAGES" ]]; then
   echo "Smart commit messages not specified. $AVAILABLE_ACTIONS"
   exit 1
 fi
