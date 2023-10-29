@@ -57,8 +57,9 @@ function apply() {
 }
 
 function destroy() {
-  init
-  terraform destroy -var-file=./conf/main.tfvars --auto-approve
+  export TF_VAR_keep_lock_tables="false"
+  # only remove dynamodb tables
+  apply
 }
 
 function recreate() {
