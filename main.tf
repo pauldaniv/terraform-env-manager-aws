@@ -14,8 +14,8 @@ provider "aws" {
 
 locals {
   envs = [
-        "dev",
-#    "env-manager",
+    "dev",
+    "prod",
   ]
   tags = {
     Creator      = "Terraform Env Manager"
