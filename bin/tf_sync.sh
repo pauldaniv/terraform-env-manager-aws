@@ -47,15 +47,15 @@ function recreate() {
 BIPurple='\033[1;95m'
 NC='\033[0m'
 
-AVAILABLE_ACTIONS="Available actions: [apply, enabled, disabled]"
+AVAILABLE_ACTIONS="Available actions: [enabled, disabled]"
 
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
-  -a | --action)
-    ACTION=$2
+  -s | --smart-messages)
+    SMART_COMMIT_MESSAGES=$2
     shift
     shift
     ;;
@@ -77,22 +77,22 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
-if [[ -z "$ACTION" ]]; then
-  echo "Action not specified. $AVAILABLE_ACTIONS"
+if [[ -z "$SMART_COMMIT_MESSAGES" ]]; then
+  echo "Smart commit messages not specified. $AVAILABLE_ACTIONS"
   exit 1
 fi
 
-if [[ "$ACTION" = "enabled" && "$GITHUB_COMMIT_MESSAGE" == *"action: apply"* ]]; then
+if [[ "$SMART_COMMIT_MESSAGES" = "enabled" && "$GITHUB_COMMIT_MESSAGE" == *"action: apply"* ]]; then
   echo "Creating infrastructure"
   apply
-elif [[ "$ACTION" = "disabled" || "$GITHUB_COMMIT_MESSAGE" == *"action: destroy"* ]]; then
+elif [[ "$SMART_COMMIT_MESSAGES" = "disabled" || "$GITHUB_COMMIT_MESSAGE" == *"action: destroy"* ]]; then
   echo "Destroying infrastructure"
   destroy
-elif [[ "$ACTION" = "enabled" && "$GITHUB_COMMIT_MESSAGE" == *"action: re-create"* ]]; then
+elif [[ "$SMART_COMMIT_MESSAGES" = "enabled" && "$GITHUB_COMMIT_MESSAGE" == *"action: re-create"* ]]; then
   echo "Re-creating infrastructure"
   recreate
-elif [[ "$ACTION" = "enabled" || "$ACTION" = "disabled" ]]; then
+elif [[ "$SMART_COMMIT_MESSAGES" = "enabled" || "$SMART_COMMIT_MESSAGES" = "disabled" ]]; then
   echo "Unknown commit message action provided: $GITHUB_COMMIT_MESSAGE. Available actions: [action: apply, action: destroy, action: re-create]"
 else
-  echo "Unknown action provided: $ACTION. Available actions: $AVAILABLE_ACTIONS"
+  echo "Unknown action provided: $SMART_COMMIT_MESSAGES. Available actions: $AVAILABLE_ACTIONS"
 fi
