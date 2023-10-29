@@ -3,9 +3,6 @@
 # make sure we are in the repository rood directory
 cd "$(dirname "$0")/.." || exit 1
 
-ACTION=$1
-AVAILABLE_ACTIONS="Available actions: [apply, enabled, disabled]"
-
 die() {
   echo
   echo "$*"
@@ -55,19 +52,26 @@ function recreate() {
 BIPurple='\033[1;95m'
 NC='\033[0m'
 
+AVAILABLE_ACTIONS="Available actions: [apply, enabled, disabled]"
+
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
+  -a | --action)
+    ACTION=$2
+    shift
+    shift
+    ;;
   --dry-run)
     DRY_RUN=true
     shift # past argument
     ;;
-    #  -*)
-    #    echo "Unknown option $1"
-    #    exit 1
-    #    ;;
+  -*)
+    echo "Unknown option $1"
+    exit 1
+    ;;
   *)
     echo "Hello $1"
     POSITIONAL_ARGS+=("$1") # save positional arg
